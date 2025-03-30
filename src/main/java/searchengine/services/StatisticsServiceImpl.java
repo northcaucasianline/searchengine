@@ -26,11 +26,6 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Autowired
     private LemmaRepository lemmaRepository;
 
-    /**
-     * Метод для получения статистики о проиндексированных данных.
-     *
-     * @return StatisticsResponse со сводной информацией
-     */
     @Override
     public StatisticsResponse getStatistics() {
         TotalStatistics total = new TotalStatistics();
@@ -38,7 +33,6 @@ public class StatisticsServiceImpl implements StatisticsService {
         total.setPages((int) pageRepository.count());
         total.setLemmas((int) lemmaRepository.count());
 
-        // Проверяем, есть ли сайты, которые сейчас индексируются
         boolean isIndexing = siteRepository.existsByStatus(Site.Status.INDEXING);
         total.setIndexing(isIndexing);
 

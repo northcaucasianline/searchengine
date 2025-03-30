@@ -1,5 +1,7 @@
 package searchengine.services;
 
+import searchengine.config.SiteConfig;
+import searchengine.config.SitesList;
 import searchengine.models.Lemma;
 import searchengine.models.Page;
 import searchengine.models.Site;
@@ -22,7 +24,7 @@ import java.util.concurrent.Executors;
 @Service
 public class IndexingService {
 
-    private final ExecutorService executor = Executors.newFixedThreadPool(5); // Пул для обработки в многопоточном режиме
+    private final ExecutorService executor = Executors.newFixedThreadPool(5);
     private volatile boolean isIndexing = false;
 
     @Autowired
@@ -37,17 +39,21 @@ public class IndexingService {
     @Autowired
     private LemmatizationService lemmatizationService;
 
+    @Autowired
+    private SitesList sitesList;
+
+
     /**
      * Запуск индексации для всех сайтов, сохранённых в базе данных.
      */
     public void startIndexingAllSites() {
         if (isIndexing) {
-            return; // Если индексация уже запущена, ничего не делаем
+            return;
         }
         isIndexing = true;
+        System.out.println("1");
 
-        // Для каждого сайта запускаем задачу индексации в отдельном потоке
-        for (Site site : siteRepository.findAll()) {
+        for (SiteConfig site : sitesList.getSites()) {
             executor.submit(() -> startIndexing(site));
         }
     }
@@ -63,9 +69,14 @@ public class IndexingService {
     /**
      * Индексация одного сайта.
      *
-     * @param site Сайт, для которого нужно запустить индексацию.
+     * @param siteConfig Сайт, для которого нужно запустить индексацию.
      */
-    public void startIndexing(Site site) {
+    public void startIndexing(SiteConfig siteConfig) {
+        Site site = new Site();
+        System.out.println("2");
+
+        site.setUrl(siteConfig.getUrl());
+        site.setName(siteConfig.getName());
         site.setStatus(Site.Status.INDEXING);
         site.setStatusTime(LocalDateTime.now());
         siteRepository.save(site);
@@ -73,7 +84,6 @@ public class IndexingService {
         Set<String> visitedUrls = new HashSet<>();
         recursiveIndex(site, site.getUrl(), visitedUrls);
 
-        // После завершения обхода обновляем статус сайта
         site.setStatus(Site.Status.INDEXED);
         site.setStatusTime(LocalDateTime.now());
         siteRepository.save(site);

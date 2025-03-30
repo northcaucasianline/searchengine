@@ -8,7 +8,7 @@ import searchengine.services.IndexingService;
 
 import java.util.Map;
 
-
+@RequestMapping("/api")
 @RestController
 public class IndexingController {
 
@@ -36,13 +36,14 @@ public class IndexingController {
         return Map.of("result", success);
     }
 
-    @GetMapping("/api/startIndexing/{siteId}")
-    public String startIndexing(@PathVariable Long siteId) {
-        Site site = siteRepository.findById(siteId).orElse(null);
-        if (site == null) {
-            return "Site not found!";
-        }
-        indexingService.startIndexing(site);
-        return "Indexing started for site: " + site.getName();
-    }
+//    @GetMapping("/api/startIndexing/{siteId}")
+//    public String startIndexing(@PathVariable Long siteId) {
+//        Site site = siteRepository.findById(siteId).orElse(null);
+//        if (site == null) {
+//            return "Site not found!";
+//        }
+//        indexingService.startIndexing(site);
+//        return "Indexing started for site: " + site.getName();
+//    }
+
 }
